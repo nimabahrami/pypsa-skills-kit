@@ -1,0 +1,10 @@
+{
+  "name": "pypsa-skills",
+  "version": "1.0.0",
+  "description": "Nine industry-grade PyPSA modeling skills: network modeling, sector coupling, custom linopy constraints, physical-realism validation, market design incl. congestion economics, asset economics incl. multi-market revenue, data pipelines, solve-and-debug, and reporting. Every bundled script is smoke-tested; trigger precision is eval-tested.",
+  "author": {
+    "name": "Nima Bahrami",
+    "email": "nima@skillmix.nl"
+  },
+  "license": "MIT"
+}

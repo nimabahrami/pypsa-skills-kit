@@ -1,0 +1,14 @@
+{
+  "name": "pypsa-skills-marketplace",
+  "owner": {
+    "name": "Nima Bahrami",
+    "email": "nima@skillmix.nl"
+  },
+  "plugins": [
+    {
+      "name": "pypsa-skills",
+      "source": "./",
+      "description": "The deep PyPSA layer: 9 skills for industry-grade energy system modeling. Complementary to broad power-systems suites (PowerSkills) - for AC detail, dynamics, or distribution feeders use those; for defensible PyPSA studies use this."
+    }
+  ]
+}

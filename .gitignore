@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.smoke_out.txt
+.evals_out.txt
+.DS_Store
+figures/

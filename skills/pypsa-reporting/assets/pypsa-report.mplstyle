@@ -1,0 +1,21 @@
+# pypsa-report.mplstyle - modern utilitarian defaults
+# Use: plt.style.use("path/to/pypsa-report.mplstyle") if not using plot_style.apply_style()
+figure.constrained_layout.use : True
+figure.facecolor   : white
+font.size          : 10
+axes.titlesize     : 13
+axes.titleweight   : bold
+axes.titlelocation : left
+axes.labelsize     : 10.5
+axes.spines.top    : False
+axes.spines.right  : False
+axes.grid          : True
+axes.grid.axis     : y
+grid.alpha         : 0.25
+grid.linewidth     : 0.6
+axes.axisbelow     : True
+legend.frameon     : False
+legend.fontsize    : 9
+lines.linewidth    : 1.6
+savefig.dpi        : 150
+savefig.bbox       : tight

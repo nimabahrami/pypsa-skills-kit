@@ -1,0 +1,31 @@
+{
+  "description": "Trigger-precision eval set: prompt -> which skill should hydrate (null = none). PASS semantics: give a router ONLY the 9 L1 descriptions; it must select one of the skills in `expected` (string = exactly one acceptable; array = any listed is a pass); should_trigger=false -> it must select NONE. Runner: skills/run_evals.py (LLM judge via claude -p). Judge is stochastic: expect +/-2 on positives across runs; negatives must always reject. Last full runs 2026-06-11: 26/26, 24/26, 24/26. Pattern after Power-Agent/PowerSkills surge evals.",
+  "cases": [
+    {"id": "nm-pos-1", "prompt": "Add a 4-hour battery and an HVDC link to my model", "expected": "pypsa-network-modeling", "should_trigger": true},
+    {"id": "nm-pos-2", "prompt": "Add an extendable transmission line - what capital_cost convention applies?", "expected": "pypsa-network-modeling", "should_trigger": true},
+    {"id": "sd-pos-1", "prompt": "My optimization returns infeasible, what now?", "expected": "pypsa-solve-and-debug", "should_trigger": true},
+    {"id": "sd-pos-2", "prompt": "The solve takes 6 hours, speed it up", "expected": "pypsa-solve-and-debug", "should_trigger": true},
+    {"id": "sd-pos-3", "prompt": "Sanity-check my solved model", "expected": ["pypsa-solve-and-debug", "pypsa-physical-realism"], "should_trigger": true, "note": "README boundary prompt names solve-and-debug (battery); physical-realism is a defensible lexical match - both accepted"},
+    {"id": "cc-pos-1", "prompt": "Add a CO2 budget to my hydrogen model", "expected": "pypsa-custom-constraints", "should_trigger": true, "note": "boundary prompt from README"},
+    {"id": "cc-pos-2", "prompt": "Did linopy actually apply my reserve constraint?", "expected": "pypsa-custom-constraints", "should_trigger": true},
+    {"id": "pr-pos-1", "prompt": "Is this electrolyzer efficiency plausible?", "expected": "pypsa-physical-realism", "should_trigger": true},
+    {"id": "pr-pos-2", "prompt": "Give me a pre-delivery checklist for my sector-coupled model", "expected": "pypsa-physical-realism", "should_trigger": true},
+    {"id": "md-pos-1", "prompt": "Can I merge Germany into one bus for this study?", "expected": "pypsa-market-design", "should_trigger": true},
+    {"id": "md-pos-2", "prompt": "Compute the congestion rent on the north-south corridor", "expected": "pypsa-market-design", "should_trigger": true},
+    {"id": "md-pos-3", "prompt": "Why do my model prices differ from EPEX?", "expected": "pypsa-market-design", "should_trigger": true},
+    {"id": "ae-pos-1", "prompt": "What does this battery earn trading day-ahead and intraday?", "expected": "pypsa-asset-economics", "should_trigger": true},
+    {"id": "ae-pos-2", "prompt": "Is the LCOH from my electrolyzer bankable?", "expected": "pypsa-asset-economics", "should_trigger": true},
+    {"id": "dp-pos-1", "prompt": "Build wind capacity factors for Spain from ERA5", "expected": "pypsa-data-pipelines", "should_trigger": true},
+    {"id": "dp-pos-2", "prompt": "Update my 2020 gas price assumption to something realistic", "expected": "pypsa-data-pipelines", "should_trigger": true},
+    {"id": "sc-pos-1", "prompt": "Model district heating with heat pumps and a storage tank", "expected": "pypsa-sector-coupling", "should_trigger": true},
+    {"id": "nm-pos-3", "prompt": "Increase the cluster count in my PyPSA-Eur config and add offshore wind", "expected": "pypsa-network-modeling", "should_trigger": true},
+    {"id": "rp-pos-1", "prompt": "Plot the dispatch for the worst week", "expected": "pypsa-reporting", "should_trigger": true},
+    {"id": "rp-pos-2", "prompt": "Make my results presentable for the client", "expected": "pypsa-reporting", "should_trigger": true},
+    {"id": "neg-pandapower", "prompt": "Run an AC load flow on my pandapower case39 and check voltages", "expected": null, "should_trigger": false, "note": "pandapower stack - no pypsa-* skill may fire"},
+    {"id": "neg-psse", "prompt": "Open the PSS/E sav case and run a fault study with psspy", "expected": null, "should_trigger": false},
+    {"id": "neg-dynamics", "prompt": "Run a transient stability time-domain simulation after the fault", "expected": null, "should_trigger": false, "note": "EMT/dynamics - out of PyPSA domain"},
+    {"id": "neg-generic-plot", "prompt": "Plot a histogram of my sales data in matplotlib", "expected": null, "should_trigger": false, "note": "generic plotting, no energy context - reporting must not fire"},
+    {"id": "neg-protection", "prompt": "Check breaker duty for the new substation", "expected": null, "should_trigger": false},
+    {"id": "neg-distribution", "prompt": "Hosting capacity for rooftop PV on this OpenDSS feeder", "expected": null, "should_trigger": false}
+  ]
+}
