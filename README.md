@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/pypsa-skills-kit.png" alt="PyPSA Skills Kit - industry-grade energy modeling skills" width="100%">
+  <img src="assets/pypsa-skills-kit.png" alt="PyPSA Skills Kit - nine agent skills for PyPSA energy modeling" width="100%">
 </p>
 
 # PyPSA Skills Kit
