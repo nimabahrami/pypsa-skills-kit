@@ -8,7 +8,6 @@ Nine industry-grade AI agent skills for [PyPSA](https://pypsa.org) energy system
 
 Works with **Claude Code**, **Kiro**, **Antigravity**, **Windsurf**, and any AI coding tool that supports markdown skill/rules files. Works with vanilla PyPSA **and** workflow frameworks (PyPSA-Eur, PyPSA-Earth).
 
----
 
 ## Why this kit
 
@@ -20,7 +19,6 @@ Works with **Claude Code**, **Kiro**, **Antigravity**, **Windsurf**, and any AI 
 
 **Adversarially reviewed.** Content went through red-team rounds with numeric verification against solved networks. This caught, among other things, a sign inversion in merchant price interfaces and an LP wash-trading trap in multi-market co-optimization.
 
----
 
 ## Installation
 
@@ -76,7 +74,6 @@ cp -r skills/pypsa-* /path/to/your/project/.windsurf/skills/
 echo "When working on PyPSA models, load context from .windsurf/skills/pypsa-*/SKILL.md" >> .windsurfrules
 ```
 
----
 
 ## Usage
 
@@ -97,7 +94,6 @@ what does this battery earn trading day-ahead and intraday?
 
 > In Claude Code with the plugin installed, prefix with the namespace: `/pypsa-skills:pypsa-solve-and-debug`
 
----
 
 ## The nine skills
 
@@ -113,7 +109,6 @@ what does this battery earn trading day-ahead and intraday?
 | [`pypsa-solve-and-debug`](skills/pypsa-solve-and-debug/SKILL.md) | Why won't it solve, and what do the results mean? |
 | [`pypsa-reporting`](skills/pypsa-reporting/SKILL.md) | How do I turn a solved network into figures that double as bug detectors? |
 
----
 
 ## Suite tooling
 
@@ -128,14 +123,12 @@ python skills/run_evals.py
 python skills/detect_stack.py .
 ```
 
----
 
 ## Documentation
 
 - [`skills/README.md`](skills/README.md) — internal architecture: operations-as-skills, JIT token economics, scaling rules, maintenance cadence
 - [`skills/NOTATION.md`](skills/NOTATION.md) — contributor guide: compressed notation, edit rules, sync contracts
 
----
 
 ## Compatibility
 
