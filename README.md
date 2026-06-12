@@ -4,25 +4,25 @@
 
 # PyPSA Skills Kit
 
-Nine industry-grade AI agent skills for [PyPSA](https://pypsa.org) energy system modeling. This is the judgment layer that isn't in any documentation: which storage representation to pick before you build the wrong one, why your revenue number is 10–30% too optimistic before a lender sees it, what a five-digit CO₂ shadow price actually means, and why turning on unit commitment silently deletes your prices.
+Nine AI agent skills for [PyPSA](https://pypsa.org) energy system modeling. The PyPSA docs tell you what the API does. These skills hold the judgment that usually lives in someone's head: which storage representation to pick before you build the wrong one, why a perfect-foresight revenue number runs 10-30% too optimistic[^1] before a lender ever sees it, what a five-digit CO₂ shadow price actually means, and why turning on unit commitment silently deletes your prices.
 
 Works with **Claude Code**, **Kiro**, **Antigravity**, **Windsurf**, and any AI coding tool that supports markdown skill/rules files. Works with vanilla PyPSA **and** workflow frameworks (PyPSA-Eur, PyPSA-Earth).
 
 
 ## Why this kit
 
-**Deep, not broad.** These skills cover the PyPSA layer only. For AC voltage detail, dynamics, protection, or distribution feeders, use an AC-tool suite (e.g. [PowerSkills](https://github.com/Power-Agent/PowerSkills)) — the kit knows its boundary and routes away from non-PyPSA stacks. It does screen the AC feasibility of optimized dispatch in-suite (`n.pf`, slack-distributed, assumption-stated) and hands off violations with numbers attached.
+**Deep, not broad.** These skills cover the PyPSA layer and stop there. If you need AC voltage detail, dynamics, protection, or distribution feeders, an AC-tool suite like [PowerSkills](https://github.com/Power-Agent/PowerSkills) is the right home for that. The kit knows its boundary and routes away from stacks it doesn't cover. What it does do in-suite is screen optimized dispatch for AC feasibility (`n.pf`, slack-distributed, assumptions stated) and hand off any violations with numbers attached.
 
-**Every script and every code snippet is tested.** A suite-level smoke test compiles every bundled script, solves a synthetic network, runs the validator and figure generator on it, and extracts and executes the fenced linopy recipes from the reference files. Trigger routing is eval-tested: 29-case suite, last full run 2026-06-12 scored 29/29 (adversarial negatives 7/7 rejected every run).
+**Everything runs.** Every bundled script and every code snippet in the references is executed, not just proofread. A suite-level smoke test compiles every script, solves a synthetic network, runs the validator and figure generator on it, and executes the fenced linopy recipes pulled straight from the reference files. Trigger routing has its own eval: a 29-case suite graded by an LLM judge, so treat it as an internal regression check rather than independent proof. The last full run (2026-06-12) scored 29/29, with all 7 adversarial negatives rejected.
 
-**Token-efficient by architecture.** ~23k tokens of expertise total; a typical task loads ~2.6k (~1.2k always-on index + one skill + one reference). The other ~90% stays on disk. Verification runs as code, not context: the validator is ~3.8k tokens of Python the model never reads — only its ~200-token report enters the conversation.
+**Light on context.** The whole kit is about 23k tokens of expertise, but a typical task loads only ~2.6k of it: a small always-on index, one skill, one reference. The rest stays on disk until something needs it. Verification runs as code, not context. The validator is ~3.8k tokens of Python the model never reads; only its ~200-token report enters the conversation.
 
-**Adversarially reviewed.** Content went through red-team rounds with numeric verification against solved networks. This caught, among other things, a sign inversion in merchant price interfaces and an LP wash-trading trap in multi-market co-optimization.
+**Checked against solved networks.** The claims in these skills were verified numerically against solved networks, not just read over. That process caught, among other things, a sign inversion in the merchant price interfaces and an LP wash-trading trap in multi-market co-optimization, before either could reach a user.
 
 
 ## Installation
 
-The skills are plain markdown files — drop them into whatever folder your AI tool scans for skills/rules.
+The skills are plain markdown files. Drop them into whatever folder your AI tool scans for skills or rules.
 
 ### Claude Code
 
@@ -79,13 +79,13 @@ echo "When working on PyPSA models, load context from .windsurf/skills/pypsa-*/S
 
 Skills activate two ways in tools that support automatic trigger matching:
 
-**Automatically** — describe your problem and the matching skill loads:
+**Automatically.** Describe your problem and the matching skill loads:
 ```
 my optimization returns infeasible
 what does this battery earn trading day-ahead and intraday?
 ```
 
-**Explicitly** — call one by name (Claude Code / Kiro / Antigravity):
+**Explicitly.** Call one by name (Claude Code / Kiro / Antigravity):
 ```
 /pypsa-solve-and-debug barrier stalls with numerical difficulties
 /pypsa-reporting results/networks/solved.nc dispatch + price duration
@@ -101,7 +101,7 @@ what does this battery earn trading day-ahead and intraday?
 |---|---|
 | [`pypsa-network-modeling`](skills/pypsa-network-modeling/SKILL.md) | How do I build or extend the network correctly? (+ PyPSA-Eur/Earth config-first workflows) |
 | [`pypsa-sector-coupling`](skills/pypsa-sector-coupling/SKILL.md) | How do I represent heat, hydrogen, transport, and industry? |
-| [`pypsa-custom-constraints`](skills/pypsa-custom-constraints/SKILL.md) | How do I express behavior in linopy — and prove it landed? |
+| [`pypsa-custom-constraints`](skills/pypsa-custom-constraints/SKILL.md) | How do I express behavior in linopy, and prove it landed? |
 | [`pypsa-physical-realism`](skills/pypsa-physical-realism/SKILL.md) | Is this model physically sane? (executable validator included) |
 | [`pypsa-market-design`](skills/pypsa-market-design/SKILL.md) | Is the market representation right? Nodal/zonal, flow-based, reserves, congestion economics |
 | [`pypsa-asset-economics`](skills/pypsa-asset-economics/SKILL.md) | Is this a defensible business case? Foresight/merchant/fee bias corrections, multi-market revenue |
@@ -126,8 +126,8 @@ python skills/detect_stack.py .
 
 ## Documentation
 
-- [`skills/README.md`](skills/README.md) — internal architecture: operations-as-skills, JIT token economics, scaling rules, maintenance cadence
-- [`skills/NOTATION.md`](skills/NOTATION.md) — contributor guide: compressed notation, edit rules, sync contracts
+- [`skills/README.md`](skills/README.md): internal architecture, operations-as-skills, JIT token economics, scaling rules, maintenance cadence
+- [`skills/NOTATION.md`](skills/NOTATION.md): contributor guide, compressed notation, edit rules, sync contracts
 
 
 ## Compatibility
@@ -137,3 +137,5 @@ Verified against PyPSA 1.0.7, pandas 2.3, HiGHS 1.13, linopy 0.6, and PyPSA-Eur 
 ## License
 
 [MIT](LICENSE)
+
+[^1]: "Percent of perfect foresight" is the standard benchmark for real trading performance. Modo Energy's [2025 ERCOT benchmarks](https://modoenergy.com/research/en/ercot-capture-rates-benchmarking-optimizer-performance-jupiter-power-hunt-energy-network-smt) show operators capturing roughly 38-85% of perfect-foresight value month to month, and a [2025 study of the German continuous intraday market](https://arxiv.org/abs/2501.07121) found forecast-driven trading earned ~11% less than perfect foresight. See also this [explainer on the benchmark itself](https://www.energy-storage.news/battery-trading-performance-demystifying-normalised-revenue-and-percent-of-perfect-foresight/) and the foundational study, [Sioshansi et al. (2009)](https://www.sciencedirect.com/science/article/abs/pii/S0140988308001631). If anything, 10-30% is conservative.
