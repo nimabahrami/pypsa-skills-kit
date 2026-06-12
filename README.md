@@ -4,9 +4,9 @@
 
 # PyPSA Skills Kit
 
-Nine industry-grade [Claude Code](https://claude.com/claude-code) skills for [PyPSA](https://pypsa.org) energy system modeling. This is the judgment layer that isn't in any documentation: which storage representation to pick before you build the wrong one, why your revenue number is 10–30% too optimistic before a lender sees it, what a five-digit CO₂ shadow price actually means, and why turning on unit commitment silently deletes your prices.
+Nine industry-grade AI agent skills for [PyPSA](https://pypsa.org) energy system modeling. This is the judgment layer that isn't in any documentation: which storage representation to pick before you build the wrong one, why your revenue number is 10–30% too optimistic before a lender sees it, what a five-digit CO₂ shadow price actually means, and why turning on unit commitment silently deletes your prices.
 
-Works with vanilla PyPSA **and** workflow frameworks (PyPSA-Eur, PyPSA-Earth).
+Works with **Claude Code**, **Kiro**, **Antigravity**, **Windsurf**, and any AI coding tool that supports markdown skill/rules files. Works with vanilla PyPSA **and** workflow frameworks (PyPSA-Eur, PyPSA-Earth).
 
 ---
 
@@ -24,36 +24,63 @@ Works with vanilla PyPSA **and** workflow frameworks (PyPSA-Eur, PyPSA-Earth).
 
 ## Installation
 
-**As a plugin (recommended)**
+The skills are plain markdown files — drop them into whatever folder your AI tool scans for skills/rules.
+
+### Claude Code
 
 ```bash
+# As a plugin (recommended)
 claude plugin marketplace add https://github.com/nimabahrami/pypsa-skills-kit
 claude plugin install pypsa-skills
-```
+# Skills invoked as: /pypsa-skills:pypsa-solve-and-debug
 
-Skills are invoked namespaced: `/pypsa-skills:pypsa-solve-and-debug`
-
-**Per project (no plugin install)** — copy the nine skill folders into your project:
-
-```bash
+# Per project (no plugin)
 cp -r skills/pypsa-* /path/to/your/project/.claude/skills/
-```
+# Skills invoked as: /pypsa-solve-and-debug
 
-Skills are invoked unnamespaced: `/pypsa-solve-and-debug`
-
-**Try without installing** (single session):
-
-```bash
+# Single session (no install)
 claude --plugin-dir /path/to/pypsa-skill
 ```
 
-> Claude Code does **not** auto-discover the `skills/` folder at repo root — use one of the three methods above.
+### Kiro
+
+```bash
+# Per project
+cp -r skills/pypsa-* /path/to/your/project/.kiro/skills/
+
+# Global (all workspaces)
+cp -r skills/pypsa-* ~/.kiro/skills/
+```
+
+Skills load automatically or via `/pypsa-solve-and-debug` slash commands.
+
+### Antigravity
+
+```bash
+# Per project
+cp -r skills/pypsa-* /path/to/your/project/.agent/skills/
+
+# Global (all workspaces)
+cp -r skills/pypsa-* ~/.gemini/antigravity/skills/
+```
+
+### Windsurf
+
+Windsurf uses rules files rather than a skill folder. Add references to the skills you want in your `.windsurfrules` or `.windsurf/rules/pypsa.md`:
+
+```bash
+# Copy skills into your project
+cp -r skills/pypsa-* /path/to/your/project/.windsurf/skills/
+
+# Then reference them in .windsurfrules or .windsurf/rules/pypsa.md
+echo "When working on PyPSA models, load context from .windsurf/skills/pypsa-*/SKILL.md" >> .windsurfrules
+```
 
 ---
 
 ## Usage
 
-Skills activate two ways:
+Skills activate two ways in tools that support automatic trigger matching:
 
 **Automatically** — describe your problem and the matching skill loads:
 ```
@@ -61,12 +88,14 @@ my optimization returns infeasible
 what does this battery earn trading day-ahead and intraday?
 ```
 
-**Explicitly** — call one by name with arguments:
+**Explicitly** — call one by name (Claude Code / Kiro / Antigravity):
 ```
-/pypsa-skills:pypsa-solve-and-debug barrier stalls with numerical difficulties
-/pypsa-skills:pypsa-reporting results/networks/solved.nc dispatch + price duration
-/pypsa-skills:pypsa-physical-realism my_model.nc
+/pypsa-solve-and-debug barrier stalls with numerical difficulties
+/pypsa-reporting results/networks/solved.nc dispatch + price duration
+/pypsa-physical-realism my_model.nc
 ```
+
+> In Claude Code with the plugin installed, prefix with the namespace: `/pypsa-skills:pypsa-solve-and-debug`
 
 ---
 
