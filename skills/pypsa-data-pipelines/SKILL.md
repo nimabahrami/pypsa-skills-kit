@@ -7,12 +7,18 @@ description: Build realistic PyPSA input data. Triggers: atlite | cutouts | wind
 # PyPSA Data Pipelines
 
 Model honesty = input honesty. Maps input class -> canonical open-source pipeline + pitfalls.
+
+## Script first
+
+- RUN `python scripts/audit_inputs.py audit network.nc` = time-series FORENSICS: solar-at-night timezone bugs | leap/DST artifacts | placeholder/flat profiles | inverted seasonality | negative loads. Boundary: static parameters/structure = pypsa-physical-realism validator; SERIES feeding the model = this script.
+- `python scripts/audit_inputs.py convert annuity|ttf|api2 ...` = executable unit conversions (owners: references/cost-data.md).
 ! PyPSA-Eur/Earth project -> these pipelines run INSIDE the workflow (retrieve rules | configured cutouts | `data: costs:` version pin); override via config, don't rebuild by hand (pypsa-network-modeling/references/framework-workflows.md).
 
 ## Input class -> pipeline
 - wind/solar capacity factors -> atlite (ERA5/SARAH cutouts) -> references/atlite-vre.md
 - heat demand, COP series -> atlite heat functionality -> references/atlite-heat.md
 - technology costs, annuities, fuel + CO2 price series -> references/cost-data.md
+- hydro inflow -> atlite `cutout.runoff` aggregated to plants -> NORMALIZE to national annual generation statistics (EIA | national TSO) — raw runoff levels are not generation. ! reservoir vs run-of-river split + calendar alignment w/ the weather year.
 - existing plant fleet -> powerplantmatching -> below
 - load time series -> ENTSO-E | OPSD -> below
 

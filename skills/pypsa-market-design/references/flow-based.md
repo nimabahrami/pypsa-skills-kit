@@ -2,7 +2,7 @@
 
 ## NTC vs FBMC
 
-- NTC = fixed bilateral exchange limits.
+- NTC = fixed bilateral exchange limits. ! direction-DEPENDENT (A->B != B->A): one Link w/ p_min_pu = -NTC_reverse/p_nom, p_max_pu = 1 @ p_nom = NTC_forward — symmetric NTC = modeling shortcut, distorts congestion income.
 - FBMC = constrains ZONE NET POSITIONS via PTDFs on critical network elements + contingencies (CNECs).
 - per CNEC: sum_z PTDF_{cnec,z} * NP_z <= RAM_cnec.
 - FBMC couples all borders simultaneously = actual EU Core mechanism.

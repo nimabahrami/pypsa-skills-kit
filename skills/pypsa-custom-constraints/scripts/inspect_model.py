@@ -8,8 +8,39 @@ Usage:
   python inspect_model.py network.nc --lp out.lp           # export LP (small nets!)
   python inspect_model.py network.nc --solved --duals custom-co2
 """
+from __future__ import annotations
+
 import argparse
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from linopy import Model
+
+
+def _print_listing(m: Model, grep: str | None) -> None:
+    """List all variables, and constraints filtered by an optional substring."""
+    print("== variables ==")
+    for name, var in m.variables.items():
+        print(f"  {name:40s} dims={dict(var.sizes)}")
+    print("== constraints ==")
+    for name, con in m.constraints.items():
+        if grep and grep not in name:
+            continue
+        print(f"  {name:40s} dims={dict(con.sizes)}")
+
+
+def _print_duals(m: Model, pattern: str) -> None:
+    """Print min/max dual for every constraint whose name contains pattern."""
+    for name, con in m.constraints.items():
+        if pattern not in name:
+            continue
+        try:
+            d = con.dual
+            print(f"-- dual({name}): min={float(d.min())} "
+                  f"max={float(d.max())} (nonzero => binding)")
+        except Exception as e:  # noqa: BLE001
+            print(f"-- dual({name}): unavailable ({e})")
 
 
 def main() -> int:
@@ -29,14 +60,7 @@ def main() -> int:
     n.optimize.create_model()
     m = n.model
 
-    print("== variables ==")
-    for name, var in m.variables.items():
-        print(f"  {name:40s} dims={dict(var.sizes)}")
-    print("== constraints ==")
-    for name, con in m.constraints.items():
-        if args.grep and args.grep not in name:
-            continue
-        print(f"  {name:40s} dims={dict(con.sizes)}")
+    _print_listing(m, args.grep)
 
     if args.lp:
         m.to_file(args.lp)
@@ -46,14 +70,7 @@ def main() -> int:
         status, condition = n.optimize.solve_model(solver_name="highs")
         print(f"status={status} condition={condition}")
         if args.duals:
-            for name, con in m.constraints.items():
-                if args.duals in name:
-                    try:
-                        d = con.dual
-                        print(f"-- dual({name}): min={float(d.min())} "
-                              f"max={float(d.max())} (nonzero => binding)")
-                    except Exception as e:  # noqa: BLE001
-                        print(f"-- dual({name}): unavailable ({e})")
+            _print_duals(m, args.duals)
     return 0
 
 

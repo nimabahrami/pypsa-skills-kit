@@ -1,7 +1,7 @@
 ---
 name: pypsa-network-modeling
 argument-hint: [what to build or change]
-description: Build/edit PyPSA networks - structural correctness pre-optimization. Triggers: PyPSA model create|modify | components | buses | carriers | snapshots | capacity expansion | dispatch | dispatch optimization | transmission | generators | storage | lines | links | loads | investment periods | unit conventions | network topology | PyPSA-Eur | PyPSA-Earth | config.yaml of a PyPSA workflow | snakemake energy workflow | even without word "network".
+description: Build/edit PyPSA networks - structural correctness pre-optimization. Triggers: PyPSA model create|modify | components | buses | carriers | snapshots | capacity expansion | dispatch | dispatch optimization | transmission | generators | storage | lines | links | loads | investment periods | unit conventions | network topology | PyPSA-Eur/Earth config.yaml | snakemake energy workflow | even without word "network".
 ---
 
 # PyPSA Network Modeling
@@ -33,7 +33,7 @@ Scope: electricity-side PyPSA models, structurally correct before optimization. 
 - Generator = un-modeled fuel -> bus energy. USE `p_max_pu` time series for VRE availability | `p_min_pu` for must-run.
 - storage: fixed P/E ratio -> StorageUnit | independent P,E sizing -> Store+2Links. ! READ references/storage-representation.md before any storage add (top structural error: BESS|TES|PHS|H2).
 - Line = AC + impedance (Kirchhoff voltage constraints) | Link = controllable point-to-point (HVDC|converters|cross-carrier). READ references/grid-transmission.md for impedance, s_max_pu, HVDC patterns.
-- GlobalConstraint = system-wide caps, 5 native types: "primary_energy" (CO2) | "operational_limit" (carrier production budget) | "transmission_volume_expansion_limit" (MWkm) | "transmission_expansion_cost_limit" (EUR) | "tech_capacity_expansion_limit" (per carrier|bus|period). Anything fancier -> pypsa-custom-constraints skill.
+- system-wide caps/budgets (CO2 | production | transmission | capacity) = GlobalConstraint territory -> pypsa-custom-constraints owns ALL of it (native types first, linopy beyond).
 
 ## Multi-period / investment
 

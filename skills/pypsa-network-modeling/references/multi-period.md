@@ -15,4 +15,4 @@ USE when optimizing investment across multiple years/periods (`n.investment_peri
 
 ## Pitfall
 
-- ! Perfect-foresight multi-period results != "bankable" asset story -> pypsa-asset-economics perfect-foresight warning, doubled. Native hedge vs uncertainty: `n.set_scenarios` stochastic (pypsa-solve-and-debug levers) — capacities robust across weighted dispatch scenarios.
+- ! Perfect-foresight multi-period results != "bankable" asset story -> pypsa-asset-economics perfect-foresight warning, doubled. Native hedge vs uncertainty: `n.set_scenarios` stochastic (pypsa-solve-and-debug/references/optimize-levers.md) — capacities robust across weighted dispatch scenarios.

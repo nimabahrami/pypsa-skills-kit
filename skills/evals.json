@@ -1,12 +1,12 @@
 {
-  "description": "Trigger-precision eval set: prompt -> which skill should hydrate (null = none). PASS semantics: give a router ONLY the 9 L1 descriptions; it must select one of the skills in `expected` (string = exactly one acceptable; array = any listed is a pass); should_trigger=false -> it must select NONE. Runner: skills/run_evals.py (LLM judge via claude -p). Judge is stochastic: expect +/-2 on positives across runs; negatives must always reject. Last full runs 2026-06-11: 26/26, 24/26, 24/26. Pattern after Power-Agent/PowerSkills surge evals.",
+  "description": "Trigger-precision eval set: prompt -> which skill should hydrate (null = none). PASS semantics: give a router ONLY the 9 L1 descriptions; it must select one of the skills in `expected` (string = exactly one acceptable; array = any listed is a pass); should_trigger=false -> it must select NONE. Runner: skills/run_evals.py (LLM judge via claude -p). Judge is stochastic: expect +/-2 on positives across runs; negatives must always reject. Last full runs 2026-06-11 (26 cases): 26/26, 24/26, 24/26. 2026-06-12 (29 cases, after pf-trigger addition): 28/29, 28/29 - misses were positive judge variance; negatives 7/7, neg-stackless-pf additionally stress-tested 5/5. 2026-06-12 harness fix: judge now runs in an EMPTY cwd (agentic claude -p had been exploring the repo instead of answering -> picked=None) + one retry on unparseable positives; post-fix full run 29/29. 2026-06-12 boundary fix: custom-constraints made the single door for ALL system-wide caps (step 0 = native GlobalConstraint before linopy); cc-pos-1 re-tightened to single owner, 4/4 consistent + full 29/29. Pattern after Power-Agent/PowerSkills surge evals.",
   "cases": [
     {"id": "nm-pos-1", "prompt": "Add a 4-hour battery and an HVDC link to my model", "expected": "pypsa-network-modeling", "should_trigger": true},
     {"id": "nm-pos-2", "prompt": "Add an extendable transmission line - what capital_cost convention applies?", "expected": "pypsa-network-modeling", "should_trigger": true},
     {"id": "sd-pos-1", "prompt": "My optimization returns infeasible, what now?", "expected": "pypsa-solve-and-debug", "should_trigger": true},
     {"id": "sd-pos-2", "prompt": "The solve takes 6 hours, speed it up", "expected": "pypsa-solve-and-debug", "should_trigger": true},
     {"id": "sd-pos-3", "prompt": "Sanity-check my solved model", "expected": ["pypsa-solve-and-debug", "pypsa-physical-realism"], "should_trigger": true, "note": "README boundary prompt names solve-and-debug (battery); physical-realism is a defensible lexical match - both accepted"},
-    {"id": "cc-pos-1", "prompt": "Add a CO2 budget to my hydrogen model", "expected": "pypsa-custom-constraints", "should_trigger": true, "note": "boundary prompt from README"},
+    {"id": "cc-pos-1", "prompt": "Add a CO2 budget to my hydrogen model", "expected": "pypsa-custom-constraints", "should_trigger": true, "note": "single door for system-wide caps; its step 0 = native GlobalConstraint before linopy"},
     {"id": "cc-pos-2", "prompt": "Did linopy actually apply my reserve constraint?", "expected": "pypsa-custom-constraints", "should_trigger": true},
     {"id": "pr-pos-1", "prompt": "Is this electrolyzer efficiency plausible?", "expected": "pypsa-physical-realism", "should_trigger": true},
     {"id": "pr-pos-2", "prompt": "Give me a pre-delivery checklist for my sector-coupled model", "expected": "pypsa-physical-realism", "should_trigger": true},
@@ -21,11 +21,14 @@
     {"id": "nm-pos-3", "prompt": "Increase the cluster count in my PyPSA-Eur config and add offshore wind", "expected": "pypsa-network-modeling", "should_trigger": true},
     {"id": "rp-pos-1", "prompt": "Plot the dispatch for the worst week", "expected": "pypsa-reporting", "should_trigger": true},
     {"id": "rp-pos-2", "prompt": "Make my results presentable for the client", "expected": "pypsa-reporting", "should_trigger": true},
+    {"id": "pr-pos-3", "prompt": "I ran n.optimize() on my nodal German grid model - will the dispatch actually hold up in an AC power flow?", "expected": "pypsa-physical-realism", "should_trigger": true},
+    {"id": "pr-pos-4", "prompt": "Check AC feasibility of my solved PyPSA network with n.pf before I report loading numbers", "expected": "pypsa-physical-realism", "should_trigger": true},
     {"id": "neg-pandapower", "prompt": "Run an AC load flow on my pandapower case39 and check voltages", "expected": null, "should_trigger": false, "note": "pandapower stack - no pypsa-* skill may fire"},
     {"id": "neg-psse", "prompt": "Open the PSS/E sav case and run a fault study with psspy", "expected": null, "should_trigger": false},
     {"id": "neg-dynamics", "prompt": "Run a transient stability time-domain simulation after the fault", "expected": null, "should_trigger": false, "note": "EMT/dynamics - out of PyPSA domain"},
     {"id": "neg-generic-plot", "prompt": "Plot a histogram of my sales data in matplotlib", "expected": null, "should_trigger": false, "note": "generic plotting, no energy context - reporting must not fire"},
     {"id": "neg-protection", "prompt": "Check breaker duty for the new substation", "expected": null, "should_trigger": false},
-    {"id": "neg-distribution", "prompt": "Hosting capacity for rooftop PV on this OpenDSS feeder", "expected": null, "should_trigger": false}
+    {"id": "neg-distribution", "prompt": "Hosting capacity for rooftop PV on this OpenDSS feeder", "expected": null, "should_trigger": false},
+    {"id": "neg-stackless-pf", "prompt": "run a power flow and check voltages on case39", "expected": null, "should_trigger": false, "note": "stack unstated - hard case after n.pf triggers were added; must still reject"}
   ]
 }

@@ -1,7 +1,7 @@
 ---
 name: pypsa-reporting
 argument-hint: [solved_network.nc] [figures wanted]
-description: Utility-grade charts + visual reports from solved PyPSA networks. Triggers: plot | chart | visualize | figure | report results | present results | dispatch stack | energy balance plot | price duration curve | SOC / storage cycling plot | cost stack | capacity expansion chart | curtailment plot | network map | diagnostic panel | show binding hours/caps on a chart | make results presentable. PyPSA results only — NOT pandapower|PSS/E|PowerWorld, NOT non-energy data; stack ambiguous? VERIFY pypsa imports/deps first.
+description: Utility-grade charts + visual reports from solved PyPSA networks. Triggers: plot | chart | visualize | figure | report results | present results | dispatch stack | energy balance plot | price duration curve | SOC / storage cycling plot | cost stack | capacity expansion chart | curtailment plot | network map | diagnostic panel | show binding hours/caps on a chart | make results presentable. PyPSA results only (NOT pandapower|PSS/E|non-energy data); stack ambiguous? VERIFY pypsa deps first.
 ---
 
 # PyPSA Reporting

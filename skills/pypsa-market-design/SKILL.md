@@ -7,6 +7,8 @@ description: Model electricity market structures in PyPSA. Triggers: market desi
 # PyPSA Market Design
 
 - PyPSA native = NODAL, perfectly competitive, marginal-cost market.
+- RUN `python scripts/price_diagnostics.py solved.nc` FIRST on any solved run = MILP no-duals trap detection | floor/bid-stack plausibility | zero-price share | per-branch congestion rents + system sum.
+- Scope: EU market architecture (FBMC | redispatch | EUR). US two-settlement / ORDC scarcity adders not covered — the nodal core + duals logic transfers, the adders don't.
 - Bus marginal prices = duals of energy balance.
 - Real markets = deliberate distortions of baseline -> choose + encode distortion matching study question.
 
@@ -29,6 +31,7 @@ description: Model electricity market structures in PyPSA. Triggers: market desi
 
 - n.buses_t.marginal_price = EUR/MWh dual of nodal balance.
 - scarcity hours price at VOLL only if load shedding w/ VOLL cost modeled -> else infeasible instead of pricing scarcity.
+- ! EU exchange bid floor = -500 EUR/MWh (DA; cap dynamic ~4-5k). Model prices below the floor = subsidy/must-run ENCODING artifact — cap the bid, never report sub-floor prices as market outcomes.
 - capacity-expansion runs -> long-run-equilibrium prices (capex enters duals via binding capacity constraints) | dispatch-only runs -> short-run prices. ! never compare either 1:1 w/ day-ahead outturns w/o stating which built.
 - ! committable units = MILP = NO duals -> marginal_price empty/meaningless. Two fixes: (a) native middle path `optimize(linearized_unit_commitment=True)` = pure LP, live prices, fractional commitment, objective optimistic ~10-20% | (b) industry pricing run: solve MILP -> FIX commitment (committable=False + p_min_pu/p_max_pu scaled by solved status) -> re-solve LP -> duals from THAT. Non-convex costs unrecovered by LP prices = why real markets pay uplift — model prices never show it; STATE when comparing.
 - storage/hydro opportunity costs -> automatic via SOC constraint duals.

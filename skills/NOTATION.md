@@ -53,7 +53,11 @@ sum=8760", not "make sure the weightings are correct".
    it and the other points at it. Sync contracts that exist today:
    chart-catalog.md <-> standard_plots.py (SKILL.md "Extending" rule);
    ranges-*.md <-> validate_network.py (physical-realism "Extending" rule);
-   diagnostics.md root causes <-> interpreting-results.md sanity battery.
+   diagnostics.md root causes <-> interpreting-results.md sanity battery;
+   power-flow-checks.md Boundary section (owner) <-> skills/README.md domain
+   guard (pointer); loading base (s_max_pu) owned by ranges-grid.md and the
+   reactive screening bound owned by ranges-generation.md — power-flow-checks.md
+   points at both.
 3. **Scaling rule** (README): new technology -> reference entries + validator
    assertions, never a new skill. New chart -> catalog entry + plot function
    + palette row. Only a new OPERATION may add a skill.

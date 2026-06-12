@@ -1,7 +1,7 @@
 ---
 name: pypsa-physical-realism
 argument-hint: [network.nc or model dir]
-description: Validate PyPSA model against physical/engineering reality - efficiency + cost ranges per technology, topology sanity, no free energy, annualized capital costs, nonzero variable costs where real inputs exist (zero-marginal-cost electrolyzer = canonical bug). Triggers: check/review/lint/sanity-check a PyPSA network | pre-delivery checklist | is this plausible / does this look right | before solving any model for real decisions | suspicious results | zero or negative prices everywhere | one technology built without limit | storage cycling that beats thermodynamics. PyPSA networks only — stack ambiguous? VERIFY pypsa imports/deps first.
+description: Validate PyPSA models against physical/engineering reality - parameter ranges | topology | free energy | cost sanity (zero-marginal-cost electrolyzer = canonical bug). Triggers: check/review/lint/sanity-check a PyPSA network | pre-delivery checklist | is this plausible / does this look right | before solving for real decisions | suspicious results | zero or negative prices everywhere | one technology built without limit | storage cycling that beats thermodynamics | AC-feasibility of optimized dispatch (n.pf | n.lpf, explicit PyPSA context only). PyPSA only; stack ambiguous? VERIFY pypsa deps first.
 ---
 
 # PyPSA Physical Realism
@@ -17,6 +17,7 @@ python scripts/validate_network.py network.nc --strict   # warnings fail too
 
 - CHECK: structural invariants + parameter ranges. Exits nonzero on ERROR.
 - REPORT: findings grouped by severity + fix each.
+- input TIME-SERIES forensics (timezone | leap | placeholder profiles) = pypsa-data-pipelines scripts/audit_inputs.py — run both before real decisions.
 
 ## Script invariants = review checklist
 
@@ -33,6 +34,7 @@ python scripts/validate_network.py network.nc --strict   # warnings fail too
 - merged buses hiding congestion relevant to THIS question? -> pypsa-market-design.
 - VERIFY: VRE capacity factors per region. Europe: wind onshore 0.20-0.40 | offshore 0.35-0.55 | solar 0.10-0.22. Wrong cutout year | unit confusion shows here first.
 - post-solve smells: storage round-trips creating energy | shadow prices 0 all hours (load not binding) | single technology absorbs whole expansion (missing p_nom_max | cost typo). Visual form -> pypsa-reporting diagnostic panel.
+- LOPF = MW-only -> optimized dispatch may be AC-infeasible. Post-solve n.pf/n.lpf screens + applicability gate + escalation boundary -> references/power-flow-checks.md.
 
 ## Range references
 

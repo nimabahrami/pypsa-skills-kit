@@ -32,7 +32,7 @@ Two encodings — pick ONE per plant, never mix:
 Sources by study type:
 - backtest -> historical spot: TTF/THE gas | API2 coal | EUA.
 - forward dispatch -> EEX/ICE forward curves (monthly granularity standard).
-- SYSTEM expansion -> deterministic low/central/high scenario sets (TYNDP | IEA WEO) = industry reporting standard; explicit hedging-under-uncertainty -> native `n.set_scenarios` stochastic, PyPSA >= 1.0 (pypsa-solve-and-debug levers); asset valuation needs multi-scenario / P50-P90 price sets -> pypsa-asset-economics Bias-1.
+- SYSTEM expansion -> deterministic low/central/high scenario sets (TYNDP | IEA WEO) = industry reporting standard; explicit hedging-under-uncertainty -> native `n.set_scenarios` stochastic, PyPSA >= 1.0 (pypsa-solve-and-debug/references/optimize-levers.md); asset valuation needs multi-scenario / P50-P90 price sets -> pypsa-asset-economics Bias-1.
 
 Conversions (! direction matters):
 - TTF quotes HHV -> LHV basis: ÷0.901 (+11%) to match LHV efficiencies (ranges-generation.md convention).

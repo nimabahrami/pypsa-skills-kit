@@ -1,7 +1,7 @@
 ---
 name: pypsa-asset-economics
 argument-hint: [asset + revenue question]
-description: Asset business cases + revenues w/ PyPSA. Triggers: revenue | profit | business case | arbitrage | merchant operation | capture price | market value | LCOH | LCOE | bankability | BESS arbitrage | TES arbitrage | revenue stacking | intraday | imbalance | multi-market | electrolyzer utilization | heat pump operating economics | VRE capture prices | PPAs. ! ALWAYS apply three bias corrections — perfect foresight + system-vs-merchant optimization + wholesale-vs-asset price (fees/levies) — before quoting any number as investable.
+description: Asset business cases + revenues w/ PyPSA. Triggers: revenue | profit | business case | arbitrage | merchant operation | capture price | market value | LCOH | LCOE | bankability | BESS arbitrage | TES arbitrage | revenue stacking | intraday | imbalance | multi-market | electrolyzer utilization | heat pump operating economics | VRE capture prices | PPAs. ! three bias corrections (foresight | merchant | fees) mandatory before quoting investable numbers.
 ---
 
 # PyPSA Asset Economics

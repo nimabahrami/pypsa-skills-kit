@@ -20,6 +20,7 @@ Format: tech -> efficiency | VOM EUR/MWh_el | annualized capex EUR/MW/a | notes.
 - VRE efficiency != 1 AND p_max_pu profile -> double-derating.
 - thermal generator marginal_cost 0 -> fuel forgotten.
 - CF outside range -> wrong cutout year | wrong turbine class | per-unit/MW confusion.
+- generator reactive output (AC pf screening): |q| <= tan(acos(PF))*p_nom; PF 0.95 -> 0.33*p_nom | PF 0.85 -> 0.62*p_nom. ! PyPSA pf ignores Q limits -> screen manually (references/power-flow-checks.md).
 
 ## CO2 (t/MWh_thermal)
 

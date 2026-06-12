@@ -23,7 +23,7 @@ Boundary: loading screens (|flow|/s_nom) = pypsa-reporting #10 | constraint mech
 ## Workflow
 
 1. RUN: pypsa-reporting #10 (line loading duration) -> WHERE/WHEN binding.
-2. SOLVE w/ assign_all_duals=True -> COMPUTE per-branch terms `(lam[bus1] - lam[bus0]) * n.lines_t.p0 * w` + system sum.
+2. SOLVE w/ assign_all_duals=True -> RUN `scripts/price_diagnostics.py` (per-branch rents + system sum, executable) | manual: `(lam[bus1] - lam[bus0]) * n.lines_t.p0 * w`.
 3. RANK capacity duals + rents -> expansion candidates.
 4. zonal redispatch quantification -> flow-based.md.
 

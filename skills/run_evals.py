@@ -24,8 +24,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
+EXPECTED_SKILL_COUNT = 9  # L1 descriptions the judge must be shown
+JUDGE_TIMEOUT_S = 120
+
 
 def load_descriptions() -> dict[str, str]:
+    """L1 `description:` frontmatter per skill, keyed by skill dir name."""
     out = {}
     for f in sorted(ROOT.glob("*/SKILL.md")):
         m = re.search(r"^description:\s*(.+?)(?=\n[a-zA-Z-]+:|\n---)",
@@ -36,6 +40,7 @@ def load_descriptions() -> dict[str, str]:
 
 
 def judge_prompt(descriptions: dict[str, str], case_prompt: str) -> str:
+    """The router-simulation prompt: skill descriptions + the case prompt."""
     lines = [f"- {name}: {desc}" for name, desc in descriptions.items()]
     return (
         "You are a skill router. Below are the available skills with their "
@@ -48,24 +53,41 @@ def judge_prompt(descriptions: dict[str, str], case_prompt: str) -> str:
 
 
 def ask(prompt: str) -> str:
-    r = subprocess.run(["claude", "-p", prompt], capture_output=True,
-                       text=True, timeout=120)
+    """One judge completion via the `claude` CLI.
+
+    Runs in an EMPTY temp directory: `claude -p` is a full agent, and with a
+    project as cwd it sometimes explores the repo instead of answering with
+    the single routing token (observed failure mode -> picked=None).
+    """
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        r = subprocess.run(["claude", "-p", prompt], capture_output=True,
+                           text=True, timeout=JUDGE_TIMEOUT_S, cwd=td)
     if r.returncode != 0:
         raise RuntimeError(f"claude CLI failed: {r.stderr[:200]}")
     return r.stdout.strip()
 
 
-def grade(answer: str, case: dict) -> tuple[bool, str]:
-    ans = answer.strip().strip(".`'\"").split()[-1] if answer.strip() else ""
-    picked = None
-    for name in load_descriptions():
+def _picked_skill(answer: str, skill_names) -> str | None:
+    """Map a judge answer to a skill name; None for NONE / unparseable.
+
+    A known skill name anywhere in the answer wins; otherwise accept a
+    pypsa-prefixed last token (judge named a skill we don't ship)."""
+    for name in skill_names:
         if name in answer:
-            picked = name
-            break
-    if ans.upper() == "NONE" and picked is None:
-        picked = None
-    elif picked is None:
-        picked = ans if ans.startswith("pypsa-") else None
+            return name
+    token = answer.strip().strip(".`'\"").split()[-1] if answer.strip() else ""
+    if token.upper() == "NONE":
+        return None
+    return token if token.startswith("pypsa-") else None
+
+
+def grade(answer: str, case: dict,
+          descriptions: dict[str, str] | None = None) -> tuple[bool, str]:
+    """Score one judge answer against the case; returns (passed, detail)."""
+    names = descriptions if descriptions is not None else load_descriptions()
+    picked = _picked_skill(answer, names)
     if not case["should_trigger"]:
         return picked is None, f"picked={picked}"
     expected = case["expected"]
@@ -85,8 +107,9 @@ def main() -> int:
         wanted = set(args.ids.split(","))
         cases = [c for c in cases if c["id"] in wanted]
     descriptions = load_descriptions()
-    if len(descriptions) != 9:
-        print(f"WARNING: found {len(descriptions)} descriptions, expected 9")
+    if len(descriptions) != EXPECTED_SKILL_COUNT:
+        print(f"WARNING: found {len(descriptions)} descriptions, "
+              f"expected {EXPECTED_SKILL_COUNT}")
 
     fails = 0
     for case in cases:
@@ -96,7 +119,11 @@ def main() -> int:
             continue
         try:
             answer = ask(prompt)
-            ok, detail = grade(answer, case)
+            ok, detail = grade(answer, case, descriptions)
+            if not ok and "picked=None" in detail and case["should_trigger"]:
+                # one retry: agentic judge wandered into prose, not a token
+                answer = ask(prompt)
+                ok, detail = grade(answer, case, descriptions)
         except Exception as e:  # noqa: BLE001
             ok, detail = False, f"runner error: {e}"
         fails += not ok

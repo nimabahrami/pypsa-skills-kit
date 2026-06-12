@@ -1,13 +1,18 @@
 ---
 name: pypsa-custom-constraints
 argument-hint: [constraint to express or verify]
-description: Write, attach, VERIFY custom PyPSA optimization constraints via linopy + extra_functionality. Triggers: linopy | n.model | extra_functionality | custom constraints | solver formulations | reserve margins | CO2 budgets | cyclic storage rules | capacity coupling | CHP back-pressure | electrolyzer minimum load | hydro cascades | EV charging windows | standard component attributes cannot express behavior | was constraint actually applied | is constraint binding | "whether linopy got what it wants".
+description: System-wide caps + custom PyPSA constraints - native GlobalConstraint types FIRST, linopy when they can't express it; always VERIFY it landed. Triggers: linopy | n.model | extra_functionality | custom constraints | GlobalConstraint | add a CO2 budget/cap | emission/production/expansion limits | solver formulations | reserve margins | cyclic storage rules | capacity coupling | CHP back-pressure | electrolyzer minimum load | hydro cascades | EV charging windows | standard component attributes cannot express behavior | was constraint actually applied | is constraint binding | "whether linopy got what it wants".
 ---
 
 # PyPSA Custom Constraints (linopy)
 
-Two jobs: express constraint correctly -> PROVE it landed in solved model.
+Three steps, in order: 0. native GlobalConstraint type covers it? -> component, ZERO linopy (list below). 1. else express in linopy. 2. PROVE it landed.
 ! Never deliver without verification checklist. Silently-ignored constraint -> plausible wrong results.
+
+## Step 0 - native first (zero linopy)
+
+- GlobalConstraint types: `"primary_energy"` (CO2/byproduct cap) | `"operational_limit"` (carrier net production, e.g. gas/biomass budget) | `"transmission_volume_expansion_limit"` (MWkm) | `"transmission_expansion_cost_limit"` (EUR) | `"tech_capacity_expansion_limit"` (cap per carrier, optional per bus + investment_period; replaces deprecated per-bus-carrier nominal constraints). ! Don't hand-roll these — CCL-style caps = tech_capacity_expansion_limit. ! 1.0.x: tech_capacity_expansion_limit NotImplemented on stochastic (set_scenarios) networks
+- Carrier growth limits (`max_growth` | `max_relative_growth`) = component attributes, also zero linopy -> pypsa-network-modeling/references/multi-period.md
 
 ## Attachment patterns
 
@@ -59,4 +64,3 @@ RUN: `scripts/inspect_model.py` | inline. Every step, every time:
 
 - ! name collisions w/ PyPSA's own constraints -> silent fail | overwrite. USE: prefix custom names (e.g. `custom-`)
 - ! constraints referencing `*_nom` vars of non-extendable components -> KeyError | worse: empty arrays -> vacuous (0 <= 0) constraints. Verification step 1 catches dimensionality giveaway
-- GlobalConstraint types (zero linopy code): `"primary_energy"` (CO2/byproduct cap) | `"operational_limit"` (carrier net production, e.g. gas/biomass budget) | `"transmission_volume_expansion_limit"` (MWkm) | `"transmission_expansion_cost_limit"` (EUR) | `"tech_capacity_expansion_limit"` (cap per carrier, optional per bus + investment_period; replaces deprecated per-bus-carrier nominal constraints). ! Don't hand-roll these — CCL-style caps = tech_capacity_expansion_limit. ! 1.0.x: tech_capacity_expansion_limit NotImplemented on stochastic (set_scenarios) networks

@@ -11,6 +11,7 @@ Checks:
 3. with pypsa installed: build + solve a small network, then
    - validate_network.py reports 0 ERRORs on it
    - standard_plots.py renders >= 6 figures from it
+4. the fenced recipes in generic-patterns.md execute against a toy model
 
 Exit nonzero on any failure. Run before every release/commit.
 """
@@ -25,11 +26,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 FAILURES: list[str] = []
 
+MIN_FIGURES = 6
+EXPECTED_RECIPE_COUNT = 3
+EXPECTED_CONSTRAINTS = ("custom-co2-cumulative", "custom-reserve-margin",
+                        "custom-h2-ratio")
+
 
 def check(label: str, ok: bool, detail: str = "") -> None:
+    """Print a PASS/FAIL line and record failures for the exit code."""
     print(f"{'PASS' if ok else 'FAIL'}  {label}" + (f"  ({detail})" if detail else ""))
     if not ok:
         FAILURES.append(label)
+
+
+def run_script(script: Path, *args: str,
+               cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    """Run a bundled script in a subprocess, capturing its output."""
+    return subprocess.run([sys.executable, str(script), *args],
+                          capture_output=True, text=True,
+                          cwd=str(cwd) if cwd else None)
+
+
+def last_stdout_line(r: subprocess.CompletedProcess[str],
+                     fallback: str = "") -> str:
+    return r.stdout.strip().splitlines()[-1] if r.stdout else fallback
 
 
 def compile_all() -> None:
@@ -44,23 +64,25 @@ def compile_all() -> None:
                 check(f"compile {s.relative_to(ROOT)}", False, str(e))
 
 
+def run_detect_stack_on(filename: str,
+                        code: str) -> subprocess.CompletedProcess[str]:
+    """Run detect_stack.py on a temp dir holding a single source file."""
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / filename).write_text(code)
+        return run_script(ROOT / "detect_stack.py", str(d))
+
+
 def test_detect_stack() -> None:
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        (d / "model.py").write_text("import pypsa\nn = pypsa.Network()\n")
-        r = subprocess.run([sys.executable, str(ROOT / "detect_stack.py"),
-                            str(d)], capture_output=True, text=True)
-        check("detect_stack: pypsa dir -> exit 0", r.returncode == 0,
-              r.stdout.strip().splitlines()[-1] if r.stdout else "")
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        (d / "grid.py").write_text("import pandapower as pp\npp.runpp(net)\n")
-        r = subprocess.run([sys.executable, str(ROOT / "detect_stack.py"),
-                            str(d)], capture_output=True, text=True)
-        check("detect_stack: pandapower dir -> exit 2", r.returncode == 2)
+    r = run_detect_stack_on("model.py", "import pypsa\nn = pypsa.Network()\n")
+    check("detect_stack: pypsa dir -> exit 0", r.returncode == 0,
+          last_stdout_line(r))
+    r = run_detect_stack_on("grid.py", "import pandapower as pp\npp.runpp(net)\n")
+    check("detect_stack: pandapower dir -> exit 2", r.returncode == 2)
 
 
 def build_solved_network(path: Path) -> bool:
+    """Build and solve a small multi-carrier network; export it to `path`."""
     import numpy as np
     import pandas as pd
     import pypsa
@@ -123,43 +145,42 @@ def test_with_pypsa() -> None:
         check("build + solve synthetic network", ok)
         if not ok:
             return
-        r = subprocess.run(
-            [sys.executable,
-             str(ROOT / "pypsa-physical-realism/scripts/validate_network.py"),
-             str(nc)], capture_output=True, text=True)
+        r = run_script(
+            ROOT / "pypsa-physical-realism/scripts/validate_network.py",
+            str(nc))
         # exit code is the contract: 0 = clean or warnings only, 1 = any ERROR
-        check("validate_network: 0 errors on clean net",
-              r.returncode == 0, r.stdout.strip().splitlines()[-1]
-              if r.stdout else r.stderr[-200:])
+        check("validate_network: 0 errors on clean net", r.returncode == 0,
+              last_stdout_line(r, r.stderr[-200:]))
         figs = Path(td) / "figs"
-        r = subprocess.run(
-            [sys.executable,
-             str(ROOT / "pypsa-reporting/scripts/standard_plots.py"),
-             str(nc), "--outdir", str(figs)],
-            capture_output=True, text=True,
-            cwd=str(ROOT / "pypsa-reporting/scripts"))
+        r = run_script(ROOT / "pypsa-reporting/scripts/standard_plots.py",
+                       str(nc), "--outdir", str(figs),
+                       cwd=ROOT / "pypsa-reporting/scripts")
         n_figs = len(list(figs.glob("*.png"))) if figs.exists() else 0
-        check("standard_plots: >= 6 figures", n_figs >= 6, f"{n_figs} rendered")
+        check("standard_plots: >= 6 figures", n_figs >= MIN_FIGURES,
+              f"{n_figs} rendered")
+        r = run_script(
+            ROOT / "pypsa-data-pipelines/scripts/audit_inputs.py",
+            "audit", str(nc))
+        check("audit_inputs: clean series on synthetic net",
+              r.returncode == 0, last_stdout_line(r, r.stderr[-200:]))
+        r = run_script(
+            ROOT / "pypsa-data-pipelines/scripts/audit_inputs.py",
+            "convert", "annuity", "--overnight", "400000",
+            "--rate", "0.07", "--life", "25")
+        check("audit_inputs: annuity conversion",
+              "0.08581" in r.stdout, last_stdout_line(r))
+        r = run_script(
+            ROOT / "pypsa-market-design/scripts/price_diagnostics.py",
+            str(nc))
+        check("price_diagnostics: clean prices + rent table",
+              r.returncode == 0 and "SYSTEM SUM" in r.stdout,
+              last_stdout_line(r, r.stderr[-200:]))
 
 
-def test_reference_snippets() -> None:
-    """Extract fenced python recipes from generic-patterns.md and EXECUTE them
-    against a toy model — reference code is content too, and untested snippets
-    rot (this exact failure shipped once)."""
-    try:
-        import pypsa
-    except ImportError:
-        print("SKIP  reference snippets - pypsa not installed")
-        return
-    import re
-
+def build_recipe_network():
+    """Toy model exposing every object the generic-pattern recipes touch."""
     import pandas as pd
-
-    src = (ROOT / "pypsa-custom-constraints/references/generic-patterns.md"
-           ).read_text()
-    blocks = re.findall(r"```python\n(.*?)```", src, re.S)
-    check("generic-patterns: found 3 fenced recipes", len(blocks) == 3,
-          f"{len(blocks)} blocks")
+    import pypsa
 
     n = pypsa.Network()
     n.set_snapshots(pd.date_range("2025-01-01", periods=24, freq="h"))
@@ -179,6 +200,27 @@ def test_reference_snippets() -> None:
           p_nom_extendable=True, efficiency=0.5, capital_cost=1e4)
     n.add("Store", "h2store", bus="h2", carrier="H2", e_nom=1000, e_cyclic=True)
     n.add("Load", "d", bus="elec", p_set=80.0)
+    return n
+
+
+def test_reference_snippets() -> None:
+    """Extract fenced python recipes from generic-patterns.md and EXECUTE them
+    against a toy model — reference code is content too, and untested snippets
+    rot (this exact failure shipped once)."""
+    try:
+        import pypsa  # noqa: F401 - guard: skip cleanly when not installed
+    except ImportError:
+        print("SKIP  reference snippets - pypsa not installed")
+        return
+    import re
+
+    src = (ROOT / "pypsa-custom-constraints/references/generic-patterns.md"
+           ).read_text()
+    blocks = re.findall(r"```python\n(.*?)```", src, re.S)
+    check("generic-patterns: found 3 fenced recipes",
+          len(blocks) == EXPECTED_RECIPE_COUNT, f"{len(blocks)} blocks")
+
+    n = build_recipe_network()
     n.optimize.create_model()
     ns = {"n": n, "m": n.model, "budget_t": 1e5,
           "firm_carriers": ["gas"], "peak_load": 80.0, "margin": 0.1, "k": 0.5}
@@ -189,9 +231,7 @@ def test_reference_snippets() -> None:
         except Exception as e:  # noqa: BLE001
             check(f"generic-patterns recipe {i} executes", False,
                   f"{type(e).__name__}: {e}")
-    expected = ["custom-co2-cumulative", "custom-reserve-margin",
-                "custom-h2-ratio"]
-    for cname in expected:
+    for cname in EXPECTED_CONSTRAINTS:
         check(f"constraint '{cname}' landed in model",
               cname in n.model.constraints)
     status, _ = n.optimize.solve_model(solver_name="highs")
