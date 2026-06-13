@@ -16,6 +16,8 @@
 - strict exclusivity -> binaries
 - LP-safe mitigation: p_charge + p_discharge <= p_nom (single inverter) -> removes most simultaneous cycling. ! Document residual slack
 - ADD: couple p_nom of both links (capacity ratio recipe) -> optimizer can't size apart when hardware shared
+- C-rate (energy-power) coupling: both e_nom + p_nom extendable on Store+Links -> fix the ratio with e_nom == c_rate_hours * p_nom (linopy equality linking the Store e_nom var to the converter p_nom var). DISTINCT from p_nom_charger == p_nom_discharger (couples the two converters; this couples energy to power). representation pitfall -> pypsa-network-modeling/references/storage-representation.md
+- BESS segmented-DOD bands (k parallel Stores, ONE shared converter; economics -> pypsa-asset-economics/references/storage-revenue.md): constrain sum_k p_discharge_k(t) <= p_nom_shared per snapshot (symmetrically for charge) over the band discharge-Link vars -> prevents each band claiming full converter power (silent power multiplication)
 
 ## Hydro cascades
 - upstream turbine outflow (+ delay) -> downstream reservoir: link StorageUnit-p_dispatch of plant u at t to inflow of plant d at t+tau

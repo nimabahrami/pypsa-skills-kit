@@ -1,7 +1,7 @@
 ---
 name: pypsa-network-modeling
 argument-hint: [what to build or change]
-description: Build/edit PyPSA networks - structural correctness pre-optimization. Triggers: PyPSA model create|modify | components | buses | carriers | snapshots | capacity expansion | dispatch | dispatch optimization | transmission | generators | storage | lines | links | loads | investment periods | unit conventions | network topology | PyPSA-Eur/Earth config.yaml | snakemake energy workflow | even without word "network".
+description: Build/edit PyPSA networks - structural correctness pre-optimization. Triggers: PyPSA model create|modify | components | buses | carriers | snapshots | capacity expansion | dispatch | dispatch optimization | transmission | generators | storage | lines | links | loads | investment periods | unit conventions | network topology | PyPSA-Eur/Earth config.yaml | snakemake energy workflow | StorageUnit vs Store+Links choice | degradation-aware storage representation | even without word "network".
 ---
 
 # PyPSA Network Modeling

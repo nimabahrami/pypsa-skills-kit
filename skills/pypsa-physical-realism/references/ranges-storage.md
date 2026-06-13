@@ -17,3 +17,4 @@ Format: tech -> per-direction eff | round-trip | standing_loss /h | energy capex
 - cavern e_nom_max: geography-capped. ! 500 TWh caverns in region without salt formations = missing-potential bug, not result.
 - battery inverter (power) cost -> ONE link only in Store+Links setups.
 - V2G cycling wear -> 1-3 EUR/MWh in discharge marginal_cost (calendar-dominated shallow-cycling assumption). Grid-BESS wear range + derivation formula owned by pypsa-asset-economics/references/storage-revenue.md — reconcile via that formula.
+- calendar-fade cost (`marginal_cost_storage`, EUR/MWh held per h) = ECONOMIC lever owned by pypsa-asset-economics/references/storage-revenue.md — no separate physical screening range here; physical anchors = the round-trip + `standing_loss` ranges above.

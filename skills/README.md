@@ -1,6 +1,6 @@
 # PyPSA Skill Suite
 
-9 self-contained skills, industry-grade PyPSA modeling. 1 folder = 1 skill (SKILL.md + references/ + scripts/) -> install|test|version independently.
+9 self-contained skills encoding PyPSA modeling judgment. 1 folder = 1 skill (SKILL.md + references/ + scripts/) -> install|test|version independently.
 Human contributors: READ NOTATION.md first (symbol grammar | edit rules | sync contracts — never model-loaded, prose allowed there).
 
 ## Architecture
